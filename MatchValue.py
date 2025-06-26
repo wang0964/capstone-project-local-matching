@@ -7,6 +7,7 @@ import pandas as pd
 model_path = r"E:\models\bart-large-mnli"
 # model_path = r"E:\local_mdeberta_xnli"
 # model_path = r"E:\local_DeBERTa"
+# model_path = r"E:\DeBERTa-v3-fever-anli"
 
 class Match:
     def __init__(self,faculty_file, idea):
