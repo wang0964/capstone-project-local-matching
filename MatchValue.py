@@ -21,25 +21,8 @@ class Match:
         
         self.faculty_df=new_etl.get_etl()
     
-    def get_top_n(self,lst,n=0):
-        dictlist=[]
-        if n>len(lst) or n<1:
-            n=len(lst)
-            
-        for i in range(n):
-            dictlist.append(lst[i])
-            
-        key_list=list(dictlist[0].keys())
-        key_list.remove('score')
-        id_name=key_list[0]
-
-        result=f'{dictlist[0][id_name]}'
-        for i in range(1,n):
-            result += ','+f'{dictlist[i][id_name]}'
-            
-        return result
     
-    def match(self):
+    def match(self): 
         faculty_df=self.faculty_df
         
         tokenizer = AutoTokenizer.from_pretrained(model_path)
