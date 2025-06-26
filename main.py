@@ -98,6 +98,7 @@ class MainFrame(tk.Frame):
 
             
     def auto_find(self):
+        self.faculty_file=None
         if self.disable_var.get():
             self.select_file1_btn.config(state="disabled")
             self.faculty_file=self.find_latest_csv("Faculty Member List*.csv")
@@ -105,8 +106,10 @@ class MainFrame(tk.Frame):
                 self.match_btn.config(state="normal")
             else:
                 self.match_btn.config(state="disabled")
+                
         else:
             self.select_file1_btn.config(state="normal")
+            self.match_btn.config(state="disabled")
              
     def update_result(self, content):
         self.show_result.config(state='normal')
