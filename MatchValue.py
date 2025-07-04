@@ -27,13 +27,17 @@ class Match:
     def match(self,parent): 
         faculty_df=self.faculty_df
         start_time=time.time()
-        current_time=start_time
+
         
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         model = AutoModelForSequenceClassification.from_pretrained(model_path)
         
         parent.match_btn.config(text="Matching")
         parent.match_btn.config(state="disabled")
+        select_btn_state=parent.select_file1_btn['state']
+        parent.select_file1_btn.config(state='disabled')
+        checkbox_state=parent.checkbox['state']
+        parent.checkbox.config(state='disabled')
 
         classifier = pipeline("zero-shot-classification", 
                             model=model, 
@@ -71,6 +75,10 @@ class Match:
         parent.match_btn.config(text="Match")
         parent.match_btn.config(state="normal")
         parent.rest_time=0
+
+        parent.select_file1_btn.config(state=select_btn_state)
+        parent.checkbox.config(state=checkbox_state)        
+        
         parent.match_result=sorted_data
         
         return sorted_data
