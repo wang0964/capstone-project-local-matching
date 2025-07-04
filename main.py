@@ -5,12 +5,19 @@ from pathlib import Path
 import glob
 import pandas as pd
 import MatchValue
+import threading
 
 
 
 class MainFrame(tk.Frame):
     faculty_file=''
     partner_file=''
+    match_result=None
+    rest_time=0
+    refresh_interval=20
+    second_cal=0
+    last_second=0
+    
     def __init__(self, master=None):
         super().__init__(master)
         self.pack(padx=20, pady=20)
@@ -79,9 +86,11 @@ class MainFrame(tk.Frame):
         self.show_result = tk.Text(self, height=5, width=50, state='disabled')
         self.show_result.pack(pady=10)        
         
-        self.match_btn = tk.Button(self, text="Match", command=self.match)
+        self.match_btn = tk.Button(self, text="Match", command=self.match, width=30)
         self.match_btn.config(state="disabled")
-        self.match_btn.pack(pady=15)        
+        self.match_btn.pack(pady=15)   
+        
+        self.after(self.refresh_interval, self.update_match)     
 
 
     def select_file1(self):
@@ -139,18 +148,51 @@ class MainFrame(tk.Frame):
     def match(self):
         content = self.text_output.get("1.0", tk.END).strip()
         new_match=MatchValue.Match(self.faculty_file, content)
-        result=new_match.match()
-        n=self.N_value.get("1.0", tk.END).strip()
+        # result=new_match.match()
+        self.match_result=None
+        self.show_result.config(state='normal')
+        self.show_result.delete("1.0", tk.END)
         
-        try:
-            n=int(n)
-        except:
-            n=3
+        threading.Thread(target=new_match.match,args=(self,)).start()
+        
+        # n=self.N_value.get("1.0", tk.END).strip()
+        
+        # try:
+        #     n=int(n)
+        # except:
+        #     n=3
             
-        result=self.get_top_n(result,n)
+        # result=self.get_top_n(result,n)
         
-        self.update_result(result)
+        # self.update_result(result)
+        self.after(self.refresh_interval, self.update_match)
 
+
+    def update_match(self):
+        if self.match_result:
+            n=self.N_value.get("1.0", tk.END).strip()
+            
+            try:
+                n=int(n)
+            except:
+                n=3
+                
+            result=self.get_top_n(self.match_result,n)          
+            self.update_result(result)
+            self.match_result=None
+            
+        # if ("Matching" in self.match_btn['text']) and (self.match_btn['state']=='disable') and (self.rest_time>0):
+        #     if self.last_second != self.rest_time:
+        #         second_cal=0
+        #         self.last_second = self.rest_time
+            
+        #     self.second_cal +=self.refresh_interval
+        #     if second_cal>=1000:
+        #         self.rest_time -= 1
+        if self.rest_time!=0:    
+            self.match_btn.config(text=f"Matching    ({self.rest_time}s left)")
+        
+        self.after(self.refresh_interval, self.update_match)
 
 if __name__ == "__main__":
     root = tk.Tk()

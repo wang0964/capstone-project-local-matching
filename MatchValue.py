@@ -2,6 +2,7 @@ import etl
 import re
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 import pandas as pd
+import time
 
 
 model_path = r"E:\models\bart-large-mnli"
@@ -23,11 +24,16 @@ class Match:
         self.faculty_df=new_etl.get_etl()
     
     
-    def match(self): 
+    def match(self,parent): 
         faculty_df=self.faculty_df
+        start_time=time.time()
+        current_time=start_time
         
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         model = AutoModelForSequenceClassification.from_pretrained(model_path)
+        
+        parent.match_btn.config(text="Matching")
+        parent.match_btn.config(state="disabled")
 
         classifier = pipeline("zero-shot-classification", 
                             model=model, 
@@ -37,7 +43,12 @@ class Match:
 
         project_idea=self.idea
         scores=[]
+        
+        total_row = len(faculty_df)
+        current_row=0
+        
         for j, frow in faculty_df.iterrows():
+            current_row += 1
             str1=frow['AcademicProgram']
             str1=re.sub(r'\(.*\)','',str1)
             str1=str1.strip()
@@ -51,8 +62,16 @@ class Match:
                         multi_label=True
             )
             scores.append( {'fID':frow['fID'],'score':result['scores'][0] })
+            using_time = time.time() -start_time
+            parent.rest_time= int((using_time / current_row) * (total_row- current_row))
+            
         
         sorted_data = sorted(scores, key=lambda x: x['score'], reverse=True)
+        
+        parent.match_btn.config(text="Match")
+        parent.match_btn.config(state="normal")
+        parent.rest_time=0
+        parent.match_result=sorted_data
         
         return sorted_data
     
