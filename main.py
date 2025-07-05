@@ -10,13 +10,14 @@ import threading
 
 
 class MainFrame(tk.Frame):
-    faculty_file=''
-    partner_file=''
+    selected_file=''
+
     match_result=None
     rest_time=0
     refresh_interval=20
     second_cal=0
     last_second=0
+    
     
     def __init__(self, master=None):
         super().__init__(master)
@@ -44,8 +45,30 @@ class MainFrame(tk.Frame):
         
 
     def create_widgets(self):
-        self.select_file1_btn = tk.Button(self, text="Select faculty data file", command=self.select_file1)
-        self.select_file1_btn.pack(pady=5)
+        self.selected_option = tk.IntVar()
+        self.radio1 = tk.Radiobutton(self, 
+                                     text="Match for Project Idea", 
+                                     variable=self.selected_option, 
+                                     value=1,
+                                     command=self.on_functionality_select
+                                     )
+        self.radio1.pack(anchor='w', padx=100)
+        self.radio2 = tk.Radiobutton(self, 
+                                     text="Match for Academic Program", 
+                                     variable=self.selected_option, 
+                                     value=2,
+                                     command=self.on_functionality_select
+                                     )
+                                     
+        self.radio2.pack(anchor='w', padx=100)
+        self.selected_option.set(1)
+        
+        self.select_file1_btn = tk.Button(self, 
+                                          text="Select Faculty Data File", 
+                                          command=self.select_file1,
+                                          width=20
+                                          )
+        self.select_file1_btn.pack(pady=20)
 
         self.disable_var = tk.BooleanVar()
         self.checkbox = tk.Checkbutton(
@@ -65,10 +88,10 @@ class MainFrame(tk.Frame):
         scrollbar = tk.Scrollbar(text_frame)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        self.text_output = tk.Text(text_frame, height=10, width=50, yscrollcommand=scrollbar.set)
-        self.text_output.pack(side=tk.LEFT, fill=tk.BOTH)
+        self.text_input = tk.Text(text_frame, height=10, width=50, yscrollcommand=scrollbar.set)
+        self.text_input.pack(side=tk.LEFT, fill=tk.BOTH)
 
-        scrollbar.config(command=self.text_output.yview)
+        scrollbar.config(command=self.text_input.yview)
         
         row_frame = tk.Frame(self)
         row_frame.pack(pady=10)
@@ -92,26 +115,62 @@ class MainFrame(tk.Frame):
         
         self.after(self.refresh_interval, self.update_match)     
 
+    def on_functionality_select(self):
+        if self.selected_option.get()==1:
+            self.select_file1_btn.config(text="Select Faculty Data File")
+            self.label1.config(text="Project Ideas:")
+        else:
+            self.select_file1_btn.config(text="Select Partner Data file")
+            self.label1.config(text=r"Academic Program/Course:")
+            
+        self.selected_file = None
+        self.disable_var.set(False)
+        self.select_file1_btn.config(state="normal")
+        self.match_btn.config(state="disabled")
+        self.match_result=None
+        
+        self.show_result.config(state='normal')
+        self.show_result.delete("1.0", tk.END)
+        self.show_result.config(state='disabled')
+
+
+            
+        self.text_input.delete("1.0", tk.END)
+        
+
 
     def select_file1(self):
-        file_path = filedialog.askopenfilename(title="Select faculty data file", 
+        if self.selected_option.get()==1:
+            _title="Select Faculty Data File"
+            _file="Faculty Member List"
+        else:
+            _title="Select Partner Data file"
+            _file="Project Partner Information"
+            
+        file_path = filedialog.askopenfilename(title=_title, 
                                                initialdir= self.get_download_folder(),
                                                filetypes=[
-                                                    ("Faculty Member List", "Faculty Member List*.csv"),
+                                                    (_file, f"{_file}*.csv"),
                                                     ("All csv files", "*.csv"),
                                                 ]
                                                )
         if file_path:
-            faculty_file=file_path
+            self.selected_file=file_path
             self.match_btn.config(state="normal")
+            
+        # print(self.selected_file)
 
             
     def auto_find(self):
-        self.faculty_file=None
+        self.selected_file=None
         if self.disable_var.get():
             self.select_file1_btn.config(state="disabled")
-            self.faculty_file=self.find_latest_csv("Faculty Member List*.csv")
-            if self.faculty_file:
+            if self.selected_option.get()==1:
+                self.selected_file=self.find_latest_csv("Faculty Member List*.csv")
+            else:
+                self.selected_file=self.find_latest_csv("Project Partner Information*.csv")
+                
+            if self.selected_file:
                 self.match_btn.config(state="normal")
             else:
                 self.match_btn.config(state="disabled")
@@ -119,6 +178,8 @@ class MainFrame(tk.Frame):
         else:
             self.select_file1_btn.config(state="normal")
             self.match_btn.config(state="disabled")
+        
+        # print(self.selected_file)
              
     def update_result(self, content):
         self.show_result.config(state='normal')
@@ -146,25 +207,18 @@ class MainFrame(tk.Frame):
         return result    
     
     def match(self):
-        content = self.text_output.get("1.0", tk.END).strip()
-        new_match=MatchValue.Match(self.faculty_file, content)
-        # result=new_match.match()
+        content = self.text_input.get("1.0", tk.END).strip()
+        if len(content)==0:
+            return
+        
         self.match_result=None
         self.show_result.config(state='normal')
         self.show_result.delete("1.0", tk.END)
         
+        new_match=MatchValue.Match(self.selected_file, content, self.selected_option.get())
+
         threading.Thread(target=new_match.match,args=(self,)).start()
         
-        # n=self.N_value.get("1.0", tk.END).strip()
-        
-        # try:
-        #     n=int(n)
-        # except:
-        #     n=3
-            
-        # result=self.get_top_n(result,n)
-        
-        # self.update_result(result)
         self.after(self.refresh_interval, self.update_match)
 
 
@@ -177,18 +231,10 @@ class MainFrame(tk.Frame):
             except:
                 n=3
                 
-            result=self.get_top_n(self.match_result,n)          
+            result=self.get_top_n(self.match_result,n)       
             self.update_result(result)
             self.match_result=None
             
-        # if ("Matching" in self.match_btn['text']) and (self.match_btn['state']=='disable') and (self.rest_time>0):
-        #     if self.last_second != self.rest_time:
-        #         second_cal=0
-        #         self.last_second = self.rest_time
-            
-        #     self.second_cal +=self.refresh_interval
-        #     if second_cal>=1000:
-        #         self.rest_time -= 1
         if self.rest_time!=0:    
             self.match_btn.config(text=f"Matching    ({self.rest_time}s left)")
         

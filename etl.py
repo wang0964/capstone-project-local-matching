@@ -4,24 +4,37 @@ import pandas as pd
 
 class ETL:
     
-    def __init__(self,faculty_file):
-        self.faculty_file=faculty_file
-        print(self.faculty_file)
+    def __init__(self,selected_file,option):
+        self.selected_file=selected_file
+        self.option=option
+        print(self.selected_file)
+        print(self.option)
         
         
     def extract(self):
-        self.faculty_df=pd.read_csv(self.faculty_file)
+        self.df=pd.read_csv(self.selected_file)
     
     def transform(self):
-        self.faculty_df=self.faculty_df[(self.faculty_df['Approved']=='Yes') & (self.faculty_df['Matched']=='No')]
-        self.faculty_df = self.faculty_df[['ID', 'AcademicProgram', 'CourseName']]
-        
-        self.faculty_df = self.faculty_df.rename(columns={'ID': 'fID'})
+        if self.option==1:
+            self.df=self.df[(self.df['Approved']=='Yes') & (self.df['Matched']=='No')]
+            self.df = self.df[['ID', 'AcademicProgram', 'CourseName']]
+            
+            self.df = self.df.rename(columns={'ID': 'fID'})
 
-        self.faculty_df['fID']=self.faculty_df['fID'].astype(int)
-        self.faculty_df['pmatch']=''
-        
+            self.df['fID']=self.df['fID'].astype(int)
+            self.df['pmatch']=''
+        else:
+            self.df=self.df[(self.df['Approved']=='Yes') & (self.df['Matched']=='No')]
+            self.df = self.df[['ID','ProjectIdea']]
+            
+            self.df = self.df.rename(columns={'ID': 'pID'})
+
+            self.df['pID']=self.df['pID'].astype(int)
+            self.df['fmatch']=''    
+            
+                
     def get_etl(self):
         self.extract()
         self.transform()
-        return self.faculty_df
+
+        return self.df
