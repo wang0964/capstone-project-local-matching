@@ -25,6 +25,9 @@ class Match:
    
 
     def match(self,parent): 
+        total_row = len(self.df)
+        if total_row==0:
+            return None
         
         start_time=time.time()
 
@@ -47,8 +50,6 @@ class Match:
                             framework="pt")
 
         scores=[]
-        
-        total_row = len(self.df)
         current_row=0
         
         for j, row in self.df.iterrows():
