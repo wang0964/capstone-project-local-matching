@@ -1,0 +1,13 @@
+toExe.bat
+bart-large-mnli
+*.csv
+import warnings
+build
+dist
+*.spec
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+*.zip
+*.log

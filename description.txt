@@ -1,0 +1,4 @@
+This project builds a web-based patient management system for clinics. It allows staff to register patients, track treatments, and manage prescriptions securely. The system is developed using Python, Flask, and a SQL database.
+
+
+Conduct a feasibility study for implementing solar, wind, or geothermal energy solutions for a community or small municipality.

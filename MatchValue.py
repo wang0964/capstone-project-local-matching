@@ -3,20 +3,36 @@ import re
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 import pandas as pd
 import time
+import sys
+import os
 
-
-model_path = r"E:\models\bart-large-mnli"
-# model_path = r"E:\local_mdeberta_xnli"
-# model_path = r"E:\local_DeBERTa"
-# model_path = r"E:\DeBERTa-v3-fever-anli"
 
 class Match:
+
+    #model_path = r"E:\models\bart-large-mnli"
+    # model_path = r"E:\local_mdeberta_xnli"
+    # model_path = r"E:\local_DeBERTa"
+    # model_path = r"E:\DeBERTa-v3-fever-anli"
+    model_path = "bart-large-mnli"
+
+    
     def __init__(self,selected_file, txt, option):
         self.selected_file=selected_file
         self.input_txt=txt
         
-        print(self.selected_file)
-        print(self.input_txt)
+        # print(self.selected_file)
+        # print(self.input_txt)
+
+        current_path=''
+        if getattr(sys, "frozen", False):  
+            current_path=os.path.dirname(sys.executable)
+        else:
+            current_path = os.path.dirname(os.path.abspath(__file__))
+
+        self.model_path=os.path.join(current_path , self.model_path)
+        print(self.model_path)
+
+
         self.option=option
         
         new_etl=etl.ETL(self.selected_file, option)
@@ -32,8 +48,8 @@ class Match:
         start_time=time.time()
 
         
-        tokenizer = AutoTokenizer.from_pretrained(model_path)
-        model = AutoModelForSequenceClassification.from_pretrained(model_path)
+        tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+        model = AutoModelForSequenceClassification.from_pretrained(self.model_path)
         
         parent.match_btn.config(text="Matching")
         parent.match_btn.config(state="disabled")

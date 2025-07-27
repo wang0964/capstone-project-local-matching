@@ -45,16 +45,18 @@ class MainFrame(tk.Frame):
         
 
     def create_widgets(self):
-        self.selected_option = tk.IntVar()
+        self.selected_option = tk.IntVar(master=self)
         self.radio1 = tk.Radiobutton(self, 
-                                     text="Match for Project Idea", 
+                                    #  text="Match for Project Idea", 
+                                     text="Look for Academic Programs", 
                                      variable=self.selected_option, 
                                      value=1,
                                      command=self.on_functionality_select
                                      )
         self.radio1.pack(anchor='w', padx=100)
         self.radio2 = tk.Radiobutton(self, 
-                                     text="Match for Academic Program", 
+                                    #  text="Match for Academic Program", 
+                                     text="Look for Projects", 
                                      variable=self.selected_option, 
                                      value=2,
                                      command=self.on_functionality_select
@@ -70,7 +72,7 @@ class MainFrame(tk.Frame):
                                           )
         self.select_file1_btn.pack(pady=20)
 
-        self.disable_var = tk.BooleanVar()
+        self.disable_var = tk.BooleanVar(master=self)
         self.checkbox = tk.Checkbutton(
             self,
             text="Find Data Files Automatically",
@@ -240,8 +242,14 @@ class MainFrame(tk.Frame):
         
         self.after(self.refresh_interval, self.update_match)
 
+
+
 if __name__ == "__main__":
+
     root = tk.Tk()
     root.title("Matching kit desktop version")
+
     app = MainFrame(master=root)
     app.mainloop()
+
+
