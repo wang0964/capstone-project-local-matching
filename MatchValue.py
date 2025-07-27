@@ -106,4 +106,4 @@ class Match:
         
         parent.match_result=sorted_data
         
-        return sorted_data        
+        return sorted_data

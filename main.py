@@ -248,7 +248,6 @@ if __name__ == "__main__":
 
     root = tk.Tk()
     root.title("Matching kit desktop version")
-
     app = MainFrame(master=root)
     app.mainloop()
 
